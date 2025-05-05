@@ -55,9 +55,9 @@ jobs:
       - name: Install dependencies
         run: |
           source .bashrc
-          pip install --upgrade pip
-          pip install -r requirements/requirements.txt
-          pip install -r requirements/requirements-test.txt
+          pip install --upgrade pip --break-system-packages
+          pip install -r requirements/requirements.txt --break-system-packages
+          pip install -r requirements/requirements-test.txt --break-system-packages
   
       - name: Run pytest
         run: pytest --cov=src tests
@@ -99,8 +99,8 @@ jobs:
 
             # Activate the virtual environment and install dependencies
             source .venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
+            pip install --upgrade pip --break-system-packages
+            pip install -r requirements/requirements.txt --break-system-packages
 
   deploy:
     needs: build
