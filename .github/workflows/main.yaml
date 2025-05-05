@@ -27,25 +27,18 @@ jobs:
       - name: Install dependencies in virtual environment
         run: |
           python -m venv .venv
-          source .venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements/requirements.txt
-          pip install -r requirements/requirements-lint.txt
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements/requirements.txt
+          .venv/bin/pip install -r requirements/requirements-lint.txt
 
       - name: Run isort
-        run: |
-          source .venv/bin/activate
-          isort ${PATH_FOR_LINT} --check --profile black
+        run: .venv/bin/isort ${PATH_FOR_LINT} --check --profile black
 
       - name: Run black
-        run: |
-          source .venv/bin/activate
-          black ${PATH_FOR_LINT} --check
+        run: .venv/bin/black ${PATH_FOR_LINT} --check
 
       - name: Run ruff
-        run: |
-          source .venv/bin/activate
-          ruff check ${PATH_FOR_LINT}
+        run: .venv/bin/ruff check ${PATH_FOR_LINT}
 
   test:
     needs: lint
@@ -63,15 +56,12 @@ jobs:
       - name: Install dependencies in virtual environment
         run: |
           python -m venv .venv
-          source .venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements/requirements.txt
-          pip install -r requirements/requirements-test.txt
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements/requirements.txt
+          .venv/bin/pip install -r requirements/requirements-test.txt
 
       - name: Run pytest
-        run: |
-          source .venv/bin/activate
-          pytest --cov=src tests
+        run: .venv/bin/pytest --cov=src tests
 
   build:
     needs: test
@@ -90,7 +80,7 @@ jobs:
           source: ".bashrc,src,config,requirements,scripts,models,data"
           target: "/home/${{ env.SERVER_USER }}/otus-cicd"
 
-      - name: Run install deps
+      - name: Run install deps on remote
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ env.SERVER_HOST }}
@@ -106,9 +96,8 @@ jobs:
               python3 -m venv .venv
             fi
 
-            source .venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements/requirements.txt
+            ./.venv/bin/pip install --upgrade pip
+            ./.venv/bin/pip install -r requirements/requirements.txt
 
   deploy:
     needs: build
@@ -118,7 +107,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run deploy script
+      - name: Run deploy script on remote
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ env.SERVER_HOST }}
@@ -127,7 +116,7 @@ jobs:
           script: |
             cd /home/${{ env.SERVER_USER }}/otus-cicd
             source .bashrc
-            source .venv/bin/activate
 
             chmod +x scripts/entrypoint.sh
-            bash scripts/entrypoint.sh
+            ./.venv/bin/python scripts/entrypoint.sh
+
